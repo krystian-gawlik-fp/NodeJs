@@ -6,5 +6,5 @@ const app = express();
 app.use(bodyParser);
 
 app.listen(3000, () =>{
-    console.log('Server is running...'); 
+    console.log('Server is running.a..'); 
 });
