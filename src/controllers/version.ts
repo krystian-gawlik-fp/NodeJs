@@ -1,4 +1,5 @@
 import { Controller, Get, Route } from "tsoa";
+import { GetVersionResponse } from "../models/getVersionResponse";
 
 @Route('version')
 export class Version extends Controller {
