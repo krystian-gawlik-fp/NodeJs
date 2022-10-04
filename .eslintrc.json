@@ -10,5 +10,9 @@
     "sourceType": "module",
     "project": ["tsconfig.json"]
   },
-  "rules": {}
+  "ignorePatterns": ["dist"],
+  "rules": {
+    "space-before-function-paren": "off",
+    "@typescript-eslint/space-before-function-paren": "off"
+  }
 }
