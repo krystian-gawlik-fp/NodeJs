@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  api:
+    depends_on:
+      - db
+    build: .
+    ports: 
+      - 3000:${APP_PORT}
+    volumes:
+      - .:/app
+    environment:
+      PGPASSWORD: ${PG_PASSWORD}
+      PGHOST: db
+      PGUSER: ${PG_USER}
+  db:
+    image: postgres
+    ports: 
+      - 3001:5432
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
