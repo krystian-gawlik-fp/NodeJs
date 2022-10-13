@@ -5,6 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "start": "tsc && nodemon -L ./dist/app.js",
+    "build": "tsc",
     "test": "jest",
     "tsoa": "tsoa routes && tsoa swagger",
     "format:check": "prettier --check .",

@@ -4,7 +4,9 @@ services:
   api:
     depends_on:
       - db
-    build: .
+    build:
+      context: .
+      dockerfile: dockerfile.dev
     ports: 
       - 3000:${APP_PORT}
     volumes:
