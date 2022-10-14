@@ -5,6 +5,7 @@ import swaggerUi from 'swagger-ui-express'
 import swaggerDocument from './swagger.json'
 import db from './util/database'
 import * as dotenv from 'dotenv'
+import logger from './util/logger'
 
 dotenv.config()
 const app = express()
@@ -16,5 +17,5 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 db.query('CREATE TABLE IF NOT EXISTS test (value int);')
 
 app.listen(process.env.APP_PORT, () => {
-  console.log(`Server is running on port ${process.env.APP_PORT}...`)
+  logger.info(`Server is running on port ${process.env.APP_PORT}...`)
 })
