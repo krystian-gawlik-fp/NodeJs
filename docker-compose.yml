@@ -12,9 +12,8 @@ services:
     volumes:
       - .:/app
     environment:
-      PGPASSWORD: ${PG_PASSWORD}
+      PG_CONN_STRING: ${PG_CONN_STRING}
       PGHOST: db
-      PGUSER: ${PG_USER}
   db:
     image: postgres
     ports: 
