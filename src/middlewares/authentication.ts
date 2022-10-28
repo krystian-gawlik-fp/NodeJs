@@ -27,7 +27,7 @@ export function expressAuthentication(
     } catch {
       reject(new Error('Token not verified'))
     }
-    console.log(scopes, decodedToken)
+
     if (decodedToken) {
       if (scopes?.includes(decodedToken.role.toString())) {
         resolve(decodedToken)

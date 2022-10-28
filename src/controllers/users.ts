@@ -35,7 +35,7 @@ export class Users extends Controller {
         id: r.id,
         email: r.email,
         role: r.role,
-        version: r.transactionId
+        version: r.transactionid
       }
     })
   }
@@ -59,6 +59,14 @@ export class Users extends Controller {
     @Body() body: PatchUsersRequest
   ): Promise<void> {
     if (request['user'].role === Role.Admin || request['user'].id === id) {
+      const version = await (
+        await db().query('SELECT xmin FROM users WHERE id = $1', [id])
+      ).rows[0].xmin
+
+      if (version != body.version) {
+        throw Error('Concurrency error')
+      }
+
       await db().query(
         `UPDATE users SET email = $1, password = $2, roleId = $3 WHERE id = $4`,
         [body.email, bcrypt.hashSync(body.password, 12), body.role, id]

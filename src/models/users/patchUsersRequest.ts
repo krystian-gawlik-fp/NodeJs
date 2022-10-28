@@ -4,4 +4,5 @@ export interface PatchUsersRequest {
   email: string
   password: string
   role: Role
+  version: number
 }
