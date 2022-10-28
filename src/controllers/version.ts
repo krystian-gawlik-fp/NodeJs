@@ -1,9 +1,10 @@
-import { Controller, Get, Route, Tags } from 'tsoa'
+import { Controller, Get, Route, Security, Tags } from 'tsoa'
 import { GetVersionResponse } from '../models/getVersionResponse'
 import gitCommitHash from '../util/gitCommitHash'
 
 @Tags('version')
 @Route('version')
+@Security('jwt', ['admin'])
 export class Version extends Controller {
   @Get()
   public async getVersion(): Promise<GetVersionResponse> {
