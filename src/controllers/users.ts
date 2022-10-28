@@ -20,7 +20,6 @@ import { Role } from '../enums/role'
 
 @Tags('users')
 @Route('users')
-@Security('jwt', ['admin'])
 export class Users extends Controller {
   @Get()
   @Security('jwt', [Role.Admin, Role.User])
