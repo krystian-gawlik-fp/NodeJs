@@ -4,7 +4,6 @@ import gitCommitHash from '../util/gitCommitHash'
 
 @Tags('version')
 @Route('version')
-@Security('jwt', ['admin'])
 export class Version extends Controller {
   @Get()
   public async getVersion(): Promise<GetVersionResponse> {

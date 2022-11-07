@@ -1,6 +1,8 @@
 import * as express from 'express'
 import * as jwt from 'jsonwebtoken'
 import { JwtAuthPayload } from '../models/jwtAuthPayload'
+import Error401 from '../errors/error401'
+import Error403 from '../errors/error403'
 
 export function expressAuthentication(
   request: express.Request,
@@ -14,7 +16,7 @@ export function expressAuthentication(
 
   return new Promise((resolve, reject) => {
     if (!token) {
-      reject(new Error('No token provided'))
+      reject(new Error401('No token provided'))
     }
 
     if (!process.env.JWT_SECRET) {
@@ -25,14 +27,14 @@ export function expressAuthentication(
     try {
       decodedToken = jwt.verify(token, process.env.JWT_SECRET) as JwtAuthPayload
     } catch {
-      reject(new Error('Token not verified'))
+      reject(new Error401('Token not verified'))
     }
 
     if (decodedToken) {
       if (scopes?.includes(decodedToken.role.toString())) {
         resolve(decodedToken)
       } else {
-        reject(new Error("User don't have required role"))
+        reject(new Error403("User don't have required role"))
       }
     }
   })

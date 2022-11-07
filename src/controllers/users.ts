@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Patch,
   Path,
   Post,
@@ -17,6 +18,9 @@ import { User } from '../models/users/user'
 import { PostUsersRequest } from '../models/users/postUsersRequest'
 import { PatchUsersRequest } from '../models/users/patchUsersRequest'
 import { Role } from '../enums/role'
+import Error403 from '../errors/error403'
+import Error404 from '../errors/error404'
+import Error409 from '../errors/error409'
 
 @Tags('users')
 @Route('users')
@@ -34,10 +38,33 @@ export class Users extends Controller {
       return <User>{
         id: r.id,
         email: r.email,
-        role: r.role,
-        version: r.transactionid
+        role: r.role
       }
     })
+  }
+
+  @Get(':id')
+  @Security('jwt', [Role.Admin, Role.User])
+  public async getUser(id: number): Promise<User> {
+    const result = await db().query(
+      `SELECT u.id, u.email, r.name AS role, u.xmin AS transactionId
+      FROM users u
+      JOIN roles r on u.roleId = r.id 
+      WHERE u.deleteDate IS null
+      AND u.id = $1`,
+      [id]
+    )
+    const user = result.rows[0]
+    if (!user) {
+      throw new Error404('User not found')
+    }
+
+    this.setHeader('etag', user.transactionid)
+    return <User>{
+      id: user.id,
+      email: user.email,
+      role: user.role
+    }
   }
 
   @Post()
@@ -56,15 +83,16 @@ export class Users extends Controller {
   public async patchUesers(
     @Request() request: any,
     @Path() id: number,
-    @Body() body: PatchUsersRequest
+    @Body() body: PatchUsersRequest,
+    @Header('If-Match') etag: string
   ): Promise<void> {
     if (request['user'].role === Role.Admin || request['user'].id === id) {
       const version = await (
         await db().query('SELECT xmin FROM users WHERE id = $1', [id])
       ).rows[0].xmin
 
-      if (version != body.version) {
-        throw Error('Concurrency error')
+      if (version != etag) {
+        throw new Error409('etag dont match')
       }
 
       await db().query(
@@ -72,7 +100,7 @@ export class Users extends Controller {
         [body.email, bcrypt.hashSync(body.password, 12), body.role, id]
       )
     } else {
-      throw Error('User dont have permission to update')
+      throw new Error403('User dont have permission to update')
     }
     return
   }
@@ -89,7 +117,7 @@ export class Users extends Controller {
         id
       ])
     } else {
-      throw Error('User dont have permission to update')
+      throw new Error403('User dont have permission to update')
     }
 
     return

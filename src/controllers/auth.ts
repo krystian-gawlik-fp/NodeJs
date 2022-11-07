@@ -3,6 +3,7 @@ import { db } from '../util/database'
 import { PostAuthRequest } from '../models/postAuthRequest'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
+import Error401 from '../errors/error401'
 
 @Tags('Auth')
 @Route('auth')
@@ -35,6 +36,6 @@ export class Auth extends Controller {
       )
     }
 
-    throw Error('Login failed')
+    throw new Error401('Login failed')
   }
 }

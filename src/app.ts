@@ -6,6 +6,7 @@ import swaggerDocument from './swagger.json'
 import { seed } from './util/database'
 import * as dotenv from 'dotenv'
 import logger from './util/logger'
+import errorHandller from './middlewares/errorHandller'
 
 dotenv.config()
 const app = express()
@@ -13,6 +14,8 @@ const app = express()
 app.use(bodyParser.json())
 RegisterRoutes(app)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+
+app.use(errorHandller)
 
 seed()
 
