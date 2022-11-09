@@ -69,13 +69,13 @@ export class Users extends Controller {
 
   @Post()
   @Security('jwt', [Role.Admin])
-  public async postUsers(@Body() body: PostUsersRequest): Promise<void> {
-    await db().query(
-      `INSERT INTO users(email, password, roleId, deleteDate) VALUES ($1,$2,$3,null)`,
+  public async postUsers(@Body() body: PostUsersRequest): Promise<number> {
+    const result = await db().query(
+      `INSERT INTO users(email, password, roleId, deleteDate) VALUES ($1,$2,$3,null) RETURNING id`,
       [body.email, bcrypt.hashSync(body.password, 12), body.role]
     )
 
-    return
+    return result.rows[0]
   }
 
   @Patch(':id')
@@ -102,6 +102,8 @@ export class Users extends Controller {
     } else {
       throw new Error403('User dont have permission to update')
     }
+
+    this.setStatus(200)
     return
   }
 
@@ -120,6 +122,7 @@ export class Users extends Controller {
       throw new Error403('User dont have permission to update')
     }
 
+    this.setStatus(200)
     return
   }
 }

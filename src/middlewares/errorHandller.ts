@@ -1,5 +1,6 @@
 import Express from 'express'
 import ErrorBase from '../errors/errorBase'
+import logger from '../util/logger'
 
 export default (
   err: any,
@@ -12,6 +13,7 @@ export default (
       message: err.message
     })
   } else {
+    logger.error(err)
     return res.status(500).json({
       message: err.message
     })
