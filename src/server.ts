@@ -1,9 +1,11 @@
 import app from './app'
 import logger from './util/logger'
 import * as dotenv from 'dotenv'
+import config from './util/config'
 
 dotenv.config()
 
-app.listen(process.env.APP_PORT, () => {
-  logger.info(`Server is running on port ${process.env.APP_PORT}...`)
+const port = config('APP_PORT')
+app.listen(port, () => {
+  logger.info(`Server is running on port ${port}...`)
 })
