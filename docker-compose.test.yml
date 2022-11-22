@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  api:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: dockerfile.test
+    ports: 
+      - 3000:${APP_PORT}
+    volumes:
+      - .:/app
+    environment:
+      PG_CONN_STRING: ${PG_CONN_STRING}
+      PGHOST: db
+  db:
+    image: postgres
+    ports: 
+      - 3001:5432
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASSWORD}

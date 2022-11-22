@@ -1,4 +1,4 @@
-import { Controller, Get, Route, Tags } from 'tsoa'
+import { Controller, Get, Route, Security, Tags } from 'tsoa'
 import { GetVersionResponse } from '../models/getVersionResponse'
 import gitCommitHash from '../util/gitCommitHash'
 
