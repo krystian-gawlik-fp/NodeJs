@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { Pool } from 'pg'
-import config from './config'
-import logger from './logger'
+import config from '../util/config'
+import logger from '../util/logger'
 import format from 'pg-format'
 
 const pgConnectionString = config('PG_CONN_STRING')
