@@ -43,7 +43,7 @@ export const getCrewVersion = async (id: string) => {
 
 export const getCrewByVersion = async (version: number) => {
   return await db().query(
-    `SELECT data
+    `SELECT data, deleteDate, xmin as version
     FROM crew
     WHERE xmin::text::bigint > $1`,
     [version]

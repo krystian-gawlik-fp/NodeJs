@@ -7,5 +7,5 @@ dotenv.config()
 
 const port = config('APP_PORT')
 app.listen(port, () => {
-  logger.info(`Server is running on port ${port}...`)
+  logger.info(`App1 is running on port ${port}...`)
 })

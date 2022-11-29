@@ -17,6 +17,7 @@ import Error404 from '../errors/error404'
 import Error409 from '../errors/error409'
 import uuid from 'short-unique-id'
 import { PatchCrewRequest } from '../models/crew/patchCrewRequest'
+import { CrewWithVersion } from '../models/crew/crewWithVersion'
 
 @Tags('crew')
 @Route('crew')
@@ -25,13 +26,13 @@ export class Crews extends Controller {
   public async getCrews(): Promise<Crew[]> {
     const result = await query.getCrews()
 
-    return result.rows
+    return result.rows.map((r) => <Crew>{ ...r.data })
   }
 
   @Get(':id')
   public async getCrew(id: string): Promise<Crew> {
     const result = await query.getCrewById(id)
-    const crew = result.rows[0]
+    const crew = result.rows[0]?.data
 
     if (!crew) {
       throw new Error404('Crew not found')
@@ -77,8 +78,15 @@ export class Crews extends Controller {
   }
 
   @Get('/sync/:version')
-  public async syncCrew(@Path() version: number): Promise<Crew[]> {
+  public async syncCrew(@Path() version: number): Promise<CrewWithVersion[]> {
     const result = await query.getCrewByVersion(version)
-    return result.rows
+    return result.rows.map(
+      (r) =>
+        <CrewWithVersion>{
+          ...r.data,
+          deleteDate: r.deletedate,
+          version: r.version
+        }
+    )
   }
 }
