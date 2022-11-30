@@ -5,14 +5,19 @@ services:
     depends_on:
       - db
     build:
-      context: .
+      context: app1
       dockerfile: dockerfile.dev
     ports: 
-      - 3000:${APP_PORT}
+      - 3000:${APP1_PORT}
     volumes:
-      - .:/app
+      - ./app1/:/app
     environment:
       PG_CONN_STRING: ${PG_CONN_STRING}
+      PG_DB_NAME: ${PG_DB_NAME}
+      JWT_SECRET: ${JWT_EXPIRES_IN}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      SPACEX_API_URL: ${SPACEX_API_URL}
+      APP_PORT: ${APP1_PORT}
       PGHOST: db
   db:
     image: postgres
@@ -20,3 +25,33 @@ services:
       - 3001:5432
     environment:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
+  sync:
+    depends_on:
+      - api
+      - elasticsearch
+    build:
+      context: app2
+      dockerfile: dockerfile.dev
+    volumes:
+      - ./app2/:/app
+    environment:
+      APP1_URL: "${APP1_URL}"
+      ELASTICSEARCH_USER: '${ELASTICSEARCH_USER}'
+      ELASTICSEARCH_PASSWORD: '${ELASTICSEARCH_PASSWORD}'
+      ELASTICSEARCH_NODE: ${ELASTICSEARCH_NODE}
+      ELASTICSEARCH_PORT: ${ELASTICSEARCH_PORT}
+      SYNC_INTERVAL: ${SYNC_INTERVAL}
+  elasticsearch:
+    image: elasticsearch:8.5.0
+    ports:
+      - 9200:${ELASTICSEARCH_PORT}
+    environment:
+      discovery.type: 'single-node'
+      xpack.security.enabled: 'true'
+      ELASTIC_PASSWORD: '${ELASTICSEARCH_PASSWORD}'
+  kibana:
+    image: kibana:8.5.1
+    volumes:
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - 5601:5601

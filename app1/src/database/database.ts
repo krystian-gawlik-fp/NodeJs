@@ -1,9 +1,16 @@
+import axios from 'axios'
 import { Pool } from 'pg'
+import config from '../util/config'
+import logger from '../util/logger'
+import format from 'pg-format'
+
+const pgConnectionString = config('PG_CONN_STRING')
+const pgDbName = config('PG_DB_NAME')
 
 export const db = (dbName?: string): Pool => {
   const connString = dbName
-    ? `${process.env.PG_CONN_STRING}/${dbName}`
-    : `${process.env.PG_CONN_STRING}/${process.env.PG_DB_NAME}`
+    ? `${pgConnectionString}/${dbName}`
+    : `${pgConnectionString}/${pgDbName}`
 
   return new Pool({
     connectionString: connString
@@ -14,12 +21,12 @@ export const seed = async () => {
   const dbExist =
     (
       await db('postgres').query(
-        `SELECT * FROM pg_database WHERE datname = '${process.env.PG_DB_NAME}'`
+        `SELECT * FROM pg_database WHERE datname = '${pgDbName}'`
       )
     ).rowCount > 0
 
   if (!dbExist) {
-    await db('postgres').query(`CREATE DATABASE ${process.env.PG_DB_NAME}`)
+    await db('postgres').query(`CREATE DATABASE ${pgDbName}`)
 
     await db().query(`CREATE TABLE IF NOT EXISTS roles(
       id INT PRIMARY KEY NOT NULL,
@@ -33,6 +40,11 @@ export const seed = async () => {
       deleteDate DATE,
       CONSTRAINT fkRoleId FOREIGN KEY (roleId) REFERENCES roles(id))`)
 
+    await db().query(`CREATE TABLE IF NOT EXISTS crew(
+        id CHAR(24) PRIMARY KEY NOT NULL,
+        data JSONB NOT NULL,
+        deleteDate DATE)`)
+
     await db().query(`INSERT INTO roles(id, name) VALUES
       (1,'admin'),
       (2,'user')`)
@@ -42,5 +54,17 @@ export const seed = async () => {
       ('admin@fp.com','$2a$12$KPUwUSUs1pnrdYZWzixPBu73UYfXXeNJjVQNVY5uZTT50Qm52rZ/O',1,null),
       ('user@fp.com','$2a$12$KPUwUSUs1pnrdYZWzixPBu73UYfXXeNJjVQNVY5uZTT50Qm52rZ/O',2,null),
       ('deleteduser@fp.com','$2a$12$KPUwUSUs1pnrdYZWzixPBu73UYfXXeNJjVQNVY5uZTT50Qm52rZ/O',2, '01-01-2022')`)
+
+    const response = await axios.get(config('SPACEX_API_URL') + '/crew')
+
+    const sqlValues: string[][] = response.data.map((c: any) => {
+      return [c.id, c, null]
+    })
+
+    await db().query(
+      format(`INSERT INTO crew(id, data, deleteDate) VALUES %L`, sqlValues)
+    )
+
+    logger.info('Seed done')
   }
 }
