@@ -1,10 +1,9 @@
-import axios, { AxiosResponse } from 'axios'
+import axios from 'axios'
 import logger from './util/logger'
 import config from './util/config'
-import elasticClient from './util/elasticClient'
-import { AggregationsMaxAggregate } from '@elastic/elasticsearch/lib/api/types'
 import { Crew } from './models/crew'
 import { getCurrentVersion, setCurrentVersion } from './util/versionStore'
+import { bulkUpsert } from './elastic/crewRepository'
 
 export const sync = async () => {
   const version = await getCurrentVersion()
@@ -15,7 +14,8 @@ export const sync = async () => {
       await axios.get(`${config('APP1_URL')}/crew/sync/${version}`)
     ).data as Crew[]
   } catch {
-    logger.error('sync failed')
+    logger.error('Sync failed - Cant connect to API')
+    return
   }
 
   const newVersion = Math.max(...itemsToSync.map((i) => i.version))
@@ -29,19 +29,12 @@ export const sync = async () => {
     return
   }
 
-  await elasticClient.helpers.bulk({
-    datasource: itemsToSync,
-    refresh: true,
-    onDocument(doc) {
-      if (doc.deleteDate) {
-        return { delete: { _index: 'test', _id: doc.id } }
-      }
-      return [
-        { update: { _index: 'test', _id: doc.id } },
-        { doc_as_upsert: true }
-      ]
-    }
-  })
+  try {
+    await bulkUpsert(itemsToSync)
+  } catch {
+    logger.error('Sync failed - Cant connect to Elastic')
+    return
+  }
 
   setCurrentVersion(newVersion)
 }

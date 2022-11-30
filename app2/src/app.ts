@@ -1,6 +1,6 @@
 import { sync } from './sync'
+import config from './util/config'
 import logger from './util/logger'
 
-//sync()
-setInterval(sync, 3000)
+setInterval(sync, +config('SYNC_INTERVAL'))
 logger.info('App2 is running...')

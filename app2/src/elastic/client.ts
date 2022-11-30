@@ -1,5 +1,5 @@
 import { Client } from '@elastic/elasticsearch'
-import config from './config'
+import config from '../util/config'
 
 export default new Client({
   node: config('ELASTICSEARCH_NODE'),
