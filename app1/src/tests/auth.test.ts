@@ -6,6 +6,7 @@ import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
 import { JwtAuthPayload } from '../models/jwtAuthPayload'
 import { Role } from '../enums/role'
+import config from '../util/config'
 
 dotenv.config()
 
@@ -22,7 +23,7 @@ describe('Testing auth endpoint', () => {
 
     const payload = jwt.verify(
       resp.body,
-      process.env.JWT_SECRET ?? ''
+      config('JWT_SECRET')
     ) as JwtAuthPayload
 
     expect(payload.email).toEqual('admin@fp.com')

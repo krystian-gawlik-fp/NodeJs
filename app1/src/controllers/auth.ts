@@ -4,6 +4,7 @@ import { PostAuthRequest } from '../models/postAuthRequest'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import Error401 from '../errors/error401'
+import config from '../util/config'
 import { getUserByEmail } from '../database/users'
 
 @Tags('Auth')
@@ -14,18 +15,14 @@ export class Auth extends Controller {
     const user = await getUserByEmail(body.email)
 
     if (user && bcrypt.compareSync(body.password, user.password)) {
-      if (!process.env.JWT_SECRET) {
-        throw Error('JWT configuration missing')
-      }
-
       return jwt.sign(
         {
           id: user.id,
           email: user.email,
           role: user.role.toString()
         },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRES_IN }
+        config('JWT_SECRET'),
+        { expiresIn: config('JWT_EXPIRES_IN') }
       )
     }
 
